@@ -19,6 +19,10 @@ public class PostService {
         return postRepository.findPostsWithOffsetAndLimit(offset, limit);
     }
     
+    public long getTotalPostCount() {
+        return postRepository.count();
+    }
+    
     @Transactional
     public Post createPost(String title, String content, String author) {
         return postRepository.save(Post.builder()

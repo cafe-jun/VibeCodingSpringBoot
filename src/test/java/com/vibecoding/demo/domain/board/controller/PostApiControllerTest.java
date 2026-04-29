@@ -26,6 +26,9 @@ class PostApiControllerTest {
     @MockBean
     private PostService postService;
 
+    @MockBean
+    private org.springframework.data.jpa.mapping.JpaMetamodelMappingContext jpaMappingContext;
+
     @Test
     @DisplayName("GET /api/posts 에 offset과 limit 파라미터가 정상 동작한다")
     void getPosts() throws Exception {
@@ -39,5 +42,17 @@ class PostApiControllerTest {
                         .param("limit", "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].title").value("T1"));
+    }
+
+    @Test
+    @DisplayName("GET /api/posts/count 에 전체 게시글 개수가 정상 반환된다")
+    void getPostCount() throws Exception {
+        // given
+        given(postService.getTotalPostCount()).willReturn(15L);
+
+        // when & then
+        mockMvc.perform(get("/api/posts/count"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("15"));
     }
 }

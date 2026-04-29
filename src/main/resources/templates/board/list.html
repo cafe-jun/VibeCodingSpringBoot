@@ -21,6 +21,9 @@
 <body>
 <div class="container">
     <h1>게시판 (N번째부터 M개 조회)</h1>
+    <div style="margin-bottom: 20px; font-weight: bold; color: #2980b9;">
+        총 게시글 수: <span id="totalCount">0</span>개
+    </div>
     
     <div class="search-box">
         <label>
@@ -50,12 +53,29 @@
 </div>
 
 <script>
+    // 페이지 진입 시 전체 게시글 수를 가져옵니다.
+    window.addEventListener('DOMContentLoaded', fetchTotalCount);
+
+    async function fetchTotalCount() {
+        try {
+            const response = await fetch('/api/posts/count');
+            if (response.ok) {
+                const count = await response.json();
+                document.getElementById('totalCount').textContent = count;
+            }
+        } catch (error) {
+            console.error('총 게시글 수를 가져오는 중 오류 발생:', error);
+        }
+    }
+
     async function fetchPosts() {
         const offset = document.getElementById('offsetInput').value;
         const limit = document.getElementById('limitInput').value;
         const tbody = document.getElementById('postList');
         
         try {
+            // 게시글 조회 시 전체 카운트도 갱신
+            fetchTotalCount();
             const response = await fetch(`/api/posts?offset=${offset}&limit=${limit}`);
             if (!response.ok) throw new Error('API 호출 실패');
             
