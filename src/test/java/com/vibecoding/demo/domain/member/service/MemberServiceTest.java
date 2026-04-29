@@ -1,6 +1,7 @@
 package com.vibecoding.demo.domain.member.service;
 
 import com.vibecoding.demo.domain.member.dto.LoginRequest;
+import com.vibecoding.demo.domain.member.dto.LoginResponse;
 import com.vibecoding.demo.domain.member.dto.SignupRequest;
 import com.vibecoding.demo.domain.member.dto.SignupResponse;
 import com.vibecoding.demo.domain.member.repository.MemberRepository;
@@ -8,6 +9,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,7 +61,7 @@ class MemberServiceTest {
     }
 
     @Test
-    @DisplayName("로그인 성공 - 아이디와 비밀번호가 일치하는 경우")
+    @DisplayName("로그인 성공 - 아이디와 비밀번호가 일치하는 경우 JWT 발급 확인")
     void login_success() {
         // given
         SignupRequest signupRequest = new SignupRequest("user1", "pass1", "유저1", "u1@ex.com");
@@ -66,11 +69,12 @@ class MemberServiceTest {
         LoginRequest loginRequest = new LoginRequest("user1", "pass1");
 
         // when
-        SignupResponse response = memberService.login(loginRequest);
+        LoginResponse response = memberService.login(loginRequest);
 
         // then
         assertThat(response.loginId()).isEqualTo("user1");
         assertThat(response.name()).isEqualTo("유저1");
+        assertThat(response.accessToken()).isNotBlank();
     }
 
     @Test
@@ -81,8 +85,7 @@ class MemberServiceTest {
 
         // when & then
         assertThatThrownBy(() -> memberService.login(loginRequest))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("아이디 또는 비밀번호가 일치하지 않습니다.");
+                .isInstanceOfAny(BadCredentialsException.class, UsernameNotFoundException.class);
     }
 
     @Test
@@ -95,7 +98,6 @@ class MemberServiceTest {
 
         // when & then
         assertThatThrownBy(() -> memberService.login(loginRequest))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("아이디 또는 비밀번호가 일치하지 않습니다.");
+                .isInstanceOf(BadCredentialsException.class);
     }
 }

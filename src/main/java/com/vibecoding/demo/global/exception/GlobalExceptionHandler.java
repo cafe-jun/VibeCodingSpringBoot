@@ -3,6 +3,8 @@ package com.vibecoding.demo.global.exception;
 import com.vibecoding.demo.global.dto.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -11,10 +13,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ApiResponse<Void>> handleIllegalArgumentException(IllegalArgumentException e) {
-        log.warn("Handling IllegalArgumentException: {}", e.getMessage());
-        return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+    @ExceptionHandler({IllegalArgumentException.class, BadCredentialsException.class, UsernameNotFoundException.class})
+    public ResponseEntity<ApiResponse<Void>> handleAuthenticationException(RuntimeException e) {
+        log.warn("Authentication failed: {}", e.getMessage());
+        return ResponseEntity.badRequest().body(ApiResponse.error("아이디 또는 비밀번호가 일치하지 않습니다."));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
