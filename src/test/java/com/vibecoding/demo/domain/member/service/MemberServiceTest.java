@@ -1,5 +1,6 @@
 package com.vibecoding.demo.domain.member.service;
 
+import com.vibecoding.demo.domain.member.dto.LoginRequest;
 import com.vibecoding.demo.domain.member.dto.SignupRequest;
 import com.vibecoding.demo.domain.member.dto.SignupResponse;
 import com.vibecoding.demo.domain.member.repository.MemberRepository;
@@ -11,6 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Transactional
@@ -53,5 +55,47 @@ class MemberServiceTest {
         // 비밀번호 암호화 확인
         assertThat(passwordEncoder.matches("password123!", savedMember.getPassword())).isTrue();
         assertThat(savedMember.getPassword()).isNotEqualTo("password123!");
+    }
+
+    @Test
+    @DisplayName("로그인 성공 - 아이디와 비밀번호가 일치하는 경우")
+    void login_success() {
+        // given
+        SignupRequest signupRequest = new SignupRequest("user1", "pass1", "유저1", "u1@ex.com");
+        memberService.signup(signupRequest);
+        LoginRequest loginRequest = new LoginRequest("user1", "pass1");
+
+        // when
+        SignupResponse response = memberService.login(loginRequest);
+
+        // then
+        assertThat(response.loginId()).isEqualTo("user1");
+        assertThat(response.name()).isEqualTo("유저1");
+    }
+
+    @Test
+    @DisplayName("로그인 실패 - 아이디가 존재하지 않는 경우")
+    void login_fail_invalid_id() {
+        // given
+        LoginRequest loginRequest = new LoginRequest("nonexistent", "password");
+
+        // when & then
+        assertThatThrownBy(() -> memberService.login(loginRequest))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("아이디 또는 비밀번호가 일치하지 않습니다.");
+    }
+
+    @Test
+    @DisplayName("로그인 실패 - 비밀번호가 틀린 경우")
+    void login_fail_invalid_password() {
+        // given
+        SignupRequest signupRequest = new SignupRequest("user1", "pass1", "유저1", "u1@ex.com");
+        memberService.signup(signupRequest);
+        LoginRequest loginRequest = new LoginRequest("user1", "wrongpass");
+
+        // when & then
+        assertThatThrownBy(() -> memberService.login(loginRequest))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("아이디 또는 비밀번호가 일치하지 않습니다.");
     }
 }

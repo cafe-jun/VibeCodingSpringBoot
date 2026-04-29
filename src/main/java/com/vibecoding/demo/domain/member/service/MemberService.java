@@ -1,6 +1,8 @@
 package com.vibecoding.demo.domain.member.service;
 
+import com.vibecoding.demo.domain.member.dto.LoginRequest;
 import com.vibecoding.demo.domain.member.dto.SignupRequest;
+import com.vibecoding.demo.domain.member.dto.SignupResponse;
 import com.vibecoding.demo.domain.member.entity.Member;
 import com.vibecoding.demo.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +19,7 @@ public class MemberService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Transactional
-    public com.vibecoding.demo.domain.member.dto.SignupResponse signup(SignupRequest request) {
+    public SignupResponse signup(SignupRequest request) {
         if (memberRepository.existsByLoginId(request.loginId())) {
             throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
         }
@@ -33,10 +35,25 @@ public class MemberService {
                 .build();
 
         var savedMember = memberRepository.save(member);
-        return new com.vibecoding.demo.domain.member.dto.SignupResponse(
+        return new SignupResponse(
                 savedMember.getId(),
                 savedMember.getLoginId(),
                 savedMember.getName()
+        );
+    }
+
+    public SignupResponse login(LoginRequest request) {
+        var member = memberRepository.findByLoginId(request.loginId())
+                .orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다."));
+
+        if (!passwordEncoder.matches(request.password(), member.getPassword())) {
+            throw new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다.");
+        }
+
+        return new SignupResponse(
+                member.getId(),
+                member.getLoginId(),
+                member.getName()
         );
     }
 }
