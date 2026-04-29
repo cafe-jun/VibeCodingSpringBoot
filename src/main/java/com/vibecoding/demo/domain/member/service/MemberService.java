@@ -65,11 +65,18 @@ public class MemberService {
                 userDetails.getAuthorities().iterator().next().getAuthority()
         );
 
+        String refreshToken = jwtTokenProvider.createRefreshToken(
+                userDetails.getMemberId(),
+                userDetails.getLoginId(),
+                userDetails.getAuthorities().iterator().next().getAuthority()
+        );
+
         return new LoginResponse(
                 userDetails.getMemberId(),
                 userDetails.getLoginId(),
                 userDetails.getName(),
-                accessToken
+                accessToken,
+                refreshToken
         );
     }
 }

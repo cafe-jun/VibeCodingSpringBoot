@@ -75,6 +75,7 @@ class MemberServiceTest {
         assertThat(response.loginId()).isEqualTo("user1");
         assertThat(response.name()).isEqualTo("유저1");
         assertThat(response.accessToken()).isNotBlank();
+        assertThat(response.refreshToken()).isNotBlank();
     }
 
     @Test

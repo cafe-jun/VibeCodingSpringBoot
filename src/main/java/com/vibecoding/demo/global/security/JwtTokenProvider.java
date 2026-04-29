@@ -16,18 +16,29 @@ public class JwtTokenProvider {
 
     private final Key key;
     private final long accessTokenValidityInMilliseconds;
+    private final long refreshTokenValidityInMilliseconds;
 
     public JwtTokenProvider(
             @Value("${jwt.secret}") String secretKey,
-            @Value("${jwt.access-token-validity-in-seconds}") long accessTokenValidityInSeconds) {
+            @Value("${jwt.access-token-validity-in-seconds}") long accessTokenValidityInSeconds,
+            @Value("${jwt.refresh-token-validity-in-seconds}") long refreshTokenValidityInSeconds) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
         this.accessTokenValidityInMilliseconds = accessTokenValidityInSeconds * 1000;
+        this.refreshTokenValidityInMilliseconds = refreshTokenValidityInSeconds * 1000;
     }
 
     public String createAccessToken(Long memberId, String loginId, String role) {
+        return createToken(memberId, loginId, role, accessTokenValidityInMilliseconds);
+    }
+
+    public String createRefreshToken(Long memberId, String loginId, String role) {
+        return createToken(memberId, loginId, role, refreshTokenValidityInMilliseconds);
+    }
+
+    private String createToken(Long memberId, String loginId, String role, long validityInMilliseconds) {
         Date now = new Date();
-        Date validity = new Date(now.getTime() + accessTokenValidityInMilliseconds);
+        Date validity = new Date(now.getTime() + validityInMilliseconds);
 
         return Jwts.builder()
                 .setSubject(loginId)
