@@ -23,6 +23,11 @@ public class PostApiController {
         return ResponseEntity.ok(posts);
     }
     
+    @GetMapping("/count")
+    public ResponseEntity<Long> getPostCount() {
+        return ResponseEntity.ok(postService.getTotalPostCount());
+    }
+    
     // For testing/dummy data creation
     @PostMapping
     public ResponseEntity<Post> createPost(

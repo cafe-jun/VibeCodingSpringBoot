@@ -42,4 +42,17 @@ class PostServiceTest {
         assertThat(result.get(0).getTitle()).isEqualTo("T1");
         assertThat(result.get(1).getTitle()).isEqualTo("T2");
     }
+
+    @Test
+    @DisplayName("서비스가 리포지토리의 count 메서드를 올바르게 호출한다")
+    void getTotalPostCount() {
+        // given
+        given(postRepository.count()).willReturn(15L);
+
+        // when
+        long count = postService.getTotalPostCount();
+
+        // then
+        assertThat(count).isEqualTo(15L);
+    }
 }
