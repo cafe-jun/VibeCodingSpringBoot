@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>N번째글 M개 가져오기</title>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1 { font-size: 24px; margin-bottom: 20px; color: #2c3e50; }
+        .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
+        input[type="number"] { padding: 10px; border: 1px solid #ddd; border-radius: 4px; width: 100px; }
+        button { padding: 10px 20px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s; }
+        button:hover { background-color: #2980b9; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f8f9fa; font-weight: 600; }
+        tr:hover { background-color: #f1f1f1; }
+        .no-data { text-align: center; padding: 20px; color: #7f8c8d; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>게시판 (N번째부터 M개 조회)</h1>
+    
+    <div class="search-box">
+        <label>
+            시작 위치 (N - Offset):
+            <input type="number" id="offsetInput" value="0" min="0">
+        </label>
+        <label>
+            가져올 개수 (M - Limit):
+            <input type="number" id="limitInput" value="10" min="1">
+        </label>
+        <button onclick="fetchPosts()">조회하기</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>제목</th>
+                <th>작성자</th>
+                <th>작성일</th>
+            </tr>
+        </thead>
+        <tbody id="postList">
+            <tr><td colspan="4" class="no-data">조회 버튼을 눌러주세요.</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    async function fetchPosts() {
+        const offset = document.getElementById('offsetInput').value;
+        const limit = document.getElementById('limitInput').value;
+        const tbody = document.getElementById('postList');
+        
+        try {
+            const response = await fetch(`/api/posts?offset=${offset}&limit=${limit}`);
+            if (!response.ok) throw new Error('API 호출 실패');
+            
+            const posts = await response.json();
+            
+            tbody.innerHTML = '';
+            if (posts.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="no-data">조회된 데이터가 없습니다.</td></tr>';
+                return;
+            }
+            
+            posts.forEach(post => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${post.id}</td>
+                    <td>${post.title}</td>
+                    <td>${post.author}</td>
+                    <td>${post.createdAt ? new Date(post.createdAt).toLocaleString() : ''}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } catch (error) {
+            console.error(error);
+            alert('데이터를 가져오는 중 오류가 발생했습니다.');
+        }
+    }
+</script>
+</body>
+</html>
