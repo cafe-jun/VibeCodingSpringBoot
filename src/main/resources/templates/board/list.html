@@ -16,6 +16,10 @@
         th { background-color: #f8f9fa; font-weight: 600; }
         tr:hover { background-color: #f1f1f1; }
         .no-data { text-align: center; padding: 20px; color: #7f8c8d; }
+        .pagination { display: flex; justify-content: center; gap: 5px; margin-top: 20px; }
+        .pagination button { padding: 8px 12px; background-color: #f8f9fa; color: #333; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; }
+        .pagination button:hover { background-color: #e9ecef; }
+        .pagination button.active { background-color: #3498db; color: white; border-color: #3498db; }
     </style>
 </head>
 <body>
@@ -50,22 +54,58 @@
             <tr><td colspan="4" class="no-data">조회 버튼을 눌러주세요.</td></tr>
         </tbody>
     </table>
+
+    <div id="pagination" class="pagination"></div>
 </div>
 
 <script>
-    // 페이지 진입 시 전체 게시글 수를 가져옵니다.
-    window.addEventListener('DOMContentLoaded', fetchTotalCount);
+    // 페이지 진입 시 처음부터 데이터를 불러옵니다.
+    window.addEventListener('DOMContentLoaded', () => {
+        fetchTotalCount();
+        fetchPosts();
+    });
+
+    let currentTotalCount = 0;
 
     async function fetchTotalCount() {
         try {
             const response = await fetch('/api/posts/count');
             if (response.ok) {
-                const count = await response.json();
-                document.getElementById('totalCount').textContent = count;
+                currentTotalCount = await response.json();
+                document.getElementById('totalCount').textContent = currentTotalCount;
+                renderPagination();
             }
         } catch (error) {
             console.error('총 게시글 수를 가져오는 중 오류 발생:', error);
         }
+    }
+
+    function renderPagination() {
+        const limit = parseInt(document.getElementById('limitInput').value) || 10;
+        const currentOffset = parseInt(document.getElementById('offsetInput').value) || 0;
+        const paginationDiv = document.getElementById('pagination');
+        paginationDiv.innerHTML = '';
+
+        if (currentTotalCount <= 0) return;
+
+        const totalPages = Math.ceil(currentTotalCount / limit);
+        const currentPage = Math.floor(currentOffset / limit) + 1;
+
+        for (let i = 1; i <= totalPages; i++) {
+            const btn = document.createElement('button');
+            btn.textContent = i;
+            if (i === currentPage) {
+                btn.classList.add('active');
+            }
+            btn.onclick = () => goToPage(i, limit);
+            paginationDiv.appendChild(btn);
+        }
+    }
+
+    function goToPage(pageNumber, limit) {
+        const newOffset = (pageNumber - 1) * limit;
+        document.getElementById('offsetInput').value = newOffset;
+        fetchPosts();
     }
 
     async function fetchPosts() {
@@ -74,8 +114,9 @@
         const tbody = document.getElementById('postList');
         
         try {
-            // 게시글 조회 시 전체 카운트도 갱신
-            fetchTotalCount();
+            // 게시글 조회 시 전체 카운트와 페이지네이션도 갱신
+            await fetchTotalCount();
+            
             const response = await fetch(`/api/posts?offset=${offset}&limit=${limit}`);
             if (!response.ok) throw new Error('API 호출 실패');
             
