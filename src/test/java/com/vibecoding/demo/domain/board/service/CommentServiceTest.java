@@ -59,6 +59,7 @@ class CommentServiceTest {
 
         // then
         verify(commentRepository).save(any(Comment.class));
+        assertThat(post.getCommentCount()).isEqualTo(1L);
     }
 
     @Test
@@ -120,7 +121,11 @@ class CommentServiceTest {
         Member member = Member.builder().loginId("user").password("pass").name("name").email("email").role(Role.USER).build();
         org.springframework.test.util.ReflectionTestUtils.setField(member, "id", memberId);
 
+        Post post = Post.builder().title("T").content("C").author("A").build();
+        post.incrementCommentCount();
+
         Comment comment = Comment.builder()
+                .post(post)
                 .member(member)
                 .content("content")
                 .build();
@@ -131,5 +136,6 @@ class CommentServiceTest {
 
         // then
         assertThat(comment.isDeleted()).isTrue();
+        assertThat(post.getCommentCount()).isEqualTo(0L);
     }
 }

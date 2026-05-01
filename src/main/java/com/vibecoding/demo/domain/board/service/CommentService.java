@@ -50,6 +50,8 @@ public class CommentService {
                 .content(request.content())
                 .build();
 
+        post.incrementCommentCount();
+
         return commentRepository.save(comment).getId();
     }
 
@@ -107,6 +109,9 @@ public class CommentService {
             throw new IllegalArgumentException("댓글 삭제 권한이 없습니다.");
         }
 
-        comment.delete();
+        if (!comment.isDeleted()) {
+            comment.delete();
+            comment.getPost().decrementCommentCount();
+        }
     }
 }

@@ -30,6 +30,9 @@ public class Post {
     @Column(nullable = false)
     private String author;
 
+    @Column(nullable = false)
+    private long commentCount = 0;
+
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -39,5 +42,15 @@ public class Post {
         this.title = title;
         this.content = content;
         this.author = author;
+    }
+
+    public void incrementCommentCount() {
+        this.commentCount++;
+    }
+
+    public void decrementCommentCount() {
+        if (this.commentCount > 0) {
+            this.commentCount--;
+        }
     }
 }
