@@ -1,6 +1,9 @@
 package com.vibecoding.demo.domain.board.repository;
 
 import com.vibecoding.demo.domain.board.entity.Post;
+import com.vibecoding.demo.domain.member.entity.Member;
+import com.vibecoding.demo.domain.member.entity.Role;
+import com.vibecoding.demo.domain.member.repository.MemberRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,20 +21,32 @@ class PostRepositoryTest {
     @Autowired
     private PostRepository postRepository;
 
+    @Autowired
+    private MemberRepository memberRepository;
+
     @Test
     @DisplayName("offset과 limit으로 게시글을 조회할 수 있다")
     void findPostsWithOffsetAndLimit() {
         // given
+        Member member = Member.builder()
+                .loginId("tester")
+                .password("password")
+                .name("name")
+                .email("test@test.com")
+                .role(Role.USER)
+                .build();
+        memberRepository.save(member);
+
         for (int i = 1; i <= 15; i++) {
             postRepository.save(Post.builder()
                     .title("Title " + i)
                     .content("Content " + i)
-                    .author("Author")
+                    .member(member)
                     .build());
         }
 
         // when (offset=5, limit=5 => 최신순이므로 15~1 중 ID 내림차순(최신)으로.
-        // 현재 native query: SELECT * FROM posts ORDER BY id DESC OFFSET 5 LIMIT 5
+        // 현재 native query: SELECT * FROM posts ORDER BY id DESC LIMIT :limit OFFSET :offset
         // 전체 ID 역순: 15, 14, 13, 12, 11, [10, 9, 8, 7, 6], 5, 4, 3, 2, 1
         List<Post> result = postRepository.findPostsWithOffsetAndLimit(5, 5);
 
