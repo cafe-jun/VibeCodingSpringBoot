@@ -9,7 +9,6 @@ public record CommentResponse(
         String nickname,
         Long memberId,
         boolean isDeleted,
-        LocalDateTime createdAt,
-        List<CommentResponse> children
+        LocalDateTime createdAt
 ) {
 }

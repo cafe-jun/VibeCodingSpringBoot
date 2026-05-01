@@ -80,7 +80,7 @@ class CommentApiControllerTest {
     @DisplayName("댓글을 생성한다")
     void createComment() throws Exception {
         // given
-        CommentCreateRequest request = new CommentCreateRequest("content", null);
+        CommentCreateRequest request = new CommentCreateRequest("content");
         CustomUserDetails userDetails = createCustomUserDetails();
         org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(
                 new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities())
@@ -100,7 +100,7 @@ class CommentApiControllerTest {
     @DisplayName("댓글 목록을 조회한다")
     void getComments() throws Exception {
         // given
-        CommentResponse response = new CommentResponse(1L, "content", "tester", 1L, false, LocalDateTime.now(), List.of());
+        CommentResponse response = new CommentResponse(1L, "content", "tester", 1L, false, LocalDateTime.now());
         given(commentService.getComments(1L)).willReturn(List.of(response));
 
         // when & then

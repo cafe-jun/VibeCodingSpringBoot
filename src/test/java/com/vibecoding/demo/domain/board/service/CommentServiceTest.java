@@ -46,7 +46,7 @@ class CommentServiceTest {
         // given
         Long postId = 1L;
         Long memberId = 1L;
-        CommentCreateRequest request = new CommentCreateRequest("content", null);
+        CommentCreateRequest request = new CommentCreateRequest("content");
         Post post = Post.builder().title("title").content("content").author("author").build();
         Member member = Member.builder().loginId("user").password("pass").name("name").email("email").role(Role.USER).build();
         
@@ -63,30 +63,26 @@ class CommentServiceTest {
     }
 
     @Test
-    @DisplayName("계층형 댓글 목록을 조회한다")
+    @DisplayName("댓글 목록을 조회한다")
     void getComments() {
         // given
         Long postId = 1L;
         Post post = Post.builder().title("title").content("content").author("author").build();
         Member member = Member.builder().loginId("user").password("pass").name("name").email("email").role(Role.USER).build();
         
-        Comment parent = Comment.builder().post(post).member(member).content("parent").build();
-        org.springframework.test.util.ReflectionTestUtils.setField(parent, "id", 1L);
-        
-        Comment child = Comment.builder().post(post).member(member).parent(parent).content("child").build();
-        org.springframework.test.util.ReflectionTestUtils.setField(child, "id", 2L);
+        Comment comment1 = Comment.builder().post(post).member(member).content("comment1").build();
+        Comment comment2 = Comment.builder().post(post).member(member).content("comment2").build();
 
         given(postRepository.existsById(postId)).willReturn(true);
-        given(commentRepository.findByPostIdWithMemberAndParent(postId)).willReturn(List.of(parent, child));
+        given(commentRepository.findByPostIdWithMember(postId)).willReturn(List.of(comment1, comment2));
 
         // when
         List<CommentResponse> result = commentService.getComments(postId);
 
         // then
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).content()).isEqualTo("parent");
-        assertThat(result.get(0).children()).hasSize(1);
-        assertThat(result.get(0).children().get(0).content()).isEqualTo("child");
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).content()).isEqualTo("comment1");
+        assertThat(result.get(1).content()).isEqualTo("comment2");
     }
 
     @Test
