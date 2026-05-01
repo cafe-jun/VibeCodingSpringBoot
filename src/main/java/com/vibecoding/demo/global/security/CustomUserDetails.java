@@ -12,6 +12,7 @@ import java.util.Collections;
 @Getter
 public class CustomUserDetails implements UserDetails {
 
+    private final Member member;
     private final Long memberId;
     private final String loginId;
     private final String password;
@@ -19,6 +20,7 @@ public class CustomUserDetails implements UserDetails {
     private final Collection<? extends GrantedAuthority> authorities;
 
     public CustomUserDetails(Member member) {
+        this.member = member;
         this.memberId = member.getId();
         this.loginId = member.getLoginId();
         this.password = member.getPassword();

@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
 
-    @Query(value = "SELECT * FROM posts ORDER BY id DESC OFFSET :offset LIMIT :limit", nativeQuery = true)
+    @Query(value = "SELECT * FROM posts ORDER BY id DESC LIMIT :limit OFFSET :offset", nativeQuery = true)
     List<Post> findPostsWithOffsetAndLimit(@Param("offset") int offset, @Param("limit") int limit);
 }
