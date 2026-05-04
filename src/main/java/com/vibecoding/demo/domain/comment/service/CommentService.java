@@ -41,10 +41,6 @@ public class CommentService {
             parent = commentRepository.findById(request.parentId())
                     .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 부모 댓글입니다."));
             
-            if (parent.getParent() != null) {
-                throw new IllegalArgumentException("댓글은 최대 2단계(대댓글)까지만 작성 가능합니다.");
-            }
-            
             if (!parent.getPost().getId().equals(postId)) {
                 throw new IllegalArgumentException("부모 댓글과 게시글 정보가 일치하지 않습니다.");
             }
