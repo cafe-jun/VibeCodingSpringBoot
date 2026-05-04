@@ -28,7 +28,7 @@ public class Post extends BaseTimeEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @Column(nullable = false)
+    @Column(name = "comment_count", nullable = false)
     private long commentCount = 0;
 
     @Builder

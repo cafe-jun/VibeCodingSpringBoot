@@ -1,5 +1,7 @@
 package com.vibecoding.demo.domain.board.dto;
 
+import com.vibecoding.demo.domain.comment.dto.CommentResponse;
+
 import java.time.LocalDateTime;
 import java.util.List;
 

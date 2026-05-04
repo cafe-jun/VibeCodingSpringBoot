@@ -1,7 +1,6 @@
-package com.vibecoding.demo.domain.board.dto;
+package com.vibecoding.demo.domain.comment.dto;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 public record CommentResponse(
         Long id,

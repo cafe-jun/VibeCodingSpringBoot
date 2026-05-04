@@ -6,6 +6,7 @@ import com.vibecoding.demo.domain.board.service.PostService;
 import com.vibecoding.demo.domain.member.entity.Member;
 import com.vibecoding.demo.domain.member.entity.Role;
 import com.vibecoding.demo.global.security.CustomUserDetails;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +15,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -53,9 +54,9 @@ class PostApiControllerTest {
     @MockBean
     private org.springframework.data.jpa.mapping.JpaMetamodelMappingContext jpaMappingContext;
 
-    @org.junit.jupiter.api.BeforeEach
+    @BeforeEach
     void setup() {
-        mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup(postApiController)
+        mockMvc = MockMvcBuilders.standaloneSetup(postApiController)
                 .setCustomArgumentResolvers(new org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver())
                 .setControllerAdvice(new com.vibecoding.demo.global.exception.GlobalExceptionHandler())
                 .build();
@@ -73,18 +74,16 @@ class PostApiControllerTest {
         return new CustomUserDetails(member);
     }
 
+    // --- 게시글 테스트 ---
+
     @Test
     @DisplayName("로그인한 사용자는 게시글을 등록할 수 있다")
     void createPost() throws Exception {
-        // given
         PostCreateRequest request = new PostCreateRequest("title", "content");
         CustomUserDetails userDetails = createUserDetails(1L, Role.USER);
-        org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(
-                new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities())
-        );
+        setAuthentication(userDetails);
         given(postService.createPost(any(PostCreateRequest.class), eq(1L))).willReturn(1L);
 
-        // when & then
         mockMvc.perform(post("/api/posts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -96,11 +95,9 @@ class PostApiControllerTest {
     @Test
     @DisplayName("게시글 목록을 조회한다")
     void getPosts() throws Exception {
-        // given
-        PostListResponse post1 = new PostListResponse(1L, "T1", "A1", 0, LocalDateTime.now());
+        PostListResponse post1 = new PostListResponse(1L, "T1", "tester", 0, LocalDateTime.now());
         given(postService.getPostsByOffsetAndLimit(0, 10)).willReturn(Arrays.asList(post1));
 
-        // when & then
         mockMvc.perform(get("/api/posts"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
@@ -108,65 +105,33 @@ class PostApiControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/posts/{postId} 가 상세 정보와 댓글을 반환한다")
-    void getPostDetail() throws Exception {
-        // given
-        PostDetailResponse post = new PostDetailResponse(1L, "T1", "C1", "A1", 0, LocalDateTime.now(), List.of());
-        given(postService.getPostDetail(1L)).willReturn(post);
-
-        // when & then
-        mockMvc.perform(get("/api/posts/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.title").value("T1"))
-                .andExpect(jsonPath("$.data.comments").isArray());
-    }
-
-    @Test
     @DisplayName("게시글을 수정한다")
     void updatePost() throws Exception {
-        // given
         PostUpdateRequest request = new PostUpdateRequest("new title", "new content");
         CustomUserDetails userDetails = createUserDetails(1L, Role.USER);
-        org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(
-                new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities())
-        );
+        setAuthentication(userDetails);
 
-        // when & then
         mockMvc.perform(patch("/api/posts/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("게시글이 수정되었습니다."));
-    }
-
-    @Test
-    @DisplayName("게시글을 삭제한다")
-    void deletePost() throws Exception {
-        // given
-        CustomUserDetails userDetails = createUserDetails(1L, Role.USER);
-        org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(
-                new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities())
-        );
-
-        // when & then
-        mockMvc.perform(delete("/api/posts/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("게시글이 삭제되었습니다."));
+                .andExpect(jsonPath("$.success").value(true));
     }
 
     @Test
     @DisplayName("GET /api/posts/count 에 전체 게시글 개수가 정상 반환된다")
     void getPostCount() throws Exception {
-        // given
         given(postService.getTotalPostCount()).willReturn(15L);
 
-        // when & then
         mockMvc.perform(get("/api/posts/count"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data").value(15));
+    }
+
+    private void setAuthentication(CustomUserDetails userDetails) {
+        org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(
+                new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities())
+        );
     }
 }

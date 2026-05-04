@@ -1,22 +1,19 @@
-package com.vibecoding.demo.domain.board.service;
+package com.vibecoding.demo.domain.comment.service;
 
-import com.vibecoding.demo.domain.board.dto.CommentCreateRequest;
-import com.vibecoding.demo.domain.board.dto.CommentResponse;
-import com.vibecoding.demo.domain.board.dto.CommentUpdateRequest;
-import com.vibecoding.demo.domain.board.entity.Comment;
 import com.vibecoding.demo.domain.board.entity.Post;
-import com.vibecoding.demo.domain.board.repository.CommentRepository;
 import com.vibecoding.demo.domain.board.repository.PostRepository;
+import com.vibecoding.demo.domain.comment.dto.CommentCreateRequest;
+import com.vibecoding.demo.domain.comment.dto.CommentResponse;
+import com.vibecoding.demo.domain.comment.dto.CommentUpdateRequest;
+import com.vibecoding.demo.domain.comment.entity.Comment;
+import com.vibecoding.demo.domain.comment.repository.CommentRepository;
 import com.vibecoding.demo.domain.member.entity.Member;
 import com.vibecoding.demo.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor

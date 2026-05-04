@@ -1,5 +1,6 @@
-package com.vibecoding.demo.domain.board.entity;
+package com.vibecoding.demo.domain.comment.entity;
 
+import com.vibecoding.demo.domain.board.entity.Post;
 import com.vibecoding.demo.domain.member.entity.Member;
 import com.vibecoding.demo.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -7,9 +8,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "comments")

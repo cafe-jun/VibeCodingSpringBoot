@@ -1,4 +1,4 @@
-package com.vibecoding.demo.domain.board.dto;
+package com.vibecoding.demo.domain.comment.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
