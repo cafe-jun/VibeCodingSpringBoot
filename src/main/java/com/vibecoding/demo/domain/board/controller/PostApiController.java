@@ -1,11 +1,9 @@
 package com.vibecoding.demo.domain.board.controller;
 
-import com.vibecoding.demo.domain.board.dto.PostCreateRequest;
-import com.vibecoding.demo.domain.board.dto.PostResponse;
-import com.vibecoding.demo.domain.board.dto.PostUpdateRequest;
+import com.vibecoding.demo.domain.board.dto.*;
 import com.vibecoding.demo.domain.board.service.PostService;
-import com.vibecoding.demo.global.dto.ApiResponse;
 import com.vibecoding.demo.global.security.CustomUserDetails;
+import com.vibecoding.demo.global.dto.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -30,16 +28,16 @@ public class PostApiController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<PostResponse>>> getPosts(
+    public ResponseEntity<ApiResponse<List<PostListResponse>>> getPosts(
             @RequestParam(defaultValue = "0") int offset,
             @RequestParam(defaultValue = "10") int limit) {
-        List<PostResponse> posts = postService.getPostsByOffsetAndLimit(offset, limit);
+        List<PostListResponse> posts = postService.getPostsByOffsetAndLimit(offset, limit);
         return ResponseEntity.ok(ApiResponse.success(posts));
     }
 
     @GetMapping("/{postId}")
-    public ResponseEntity<ApiResponse<PostResponse>> getPost(@PathVariable Long postId) {
-        PostResponse post = postService.getPost(postId);
+    public ResponseEntity<ApiResponse<PostDetailResponse>> getPost(@PathVariable Long postId) {
+        PostDetailResponse post = postService.getPostDetail(postId);
         return ResponseEntity.ok(ApiResponse.success(post));
     }
 

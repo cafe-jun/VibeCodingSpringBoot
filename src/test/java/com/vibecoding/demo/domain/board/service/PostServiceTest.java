@@ -1,10 +1,12 @@
 package com.vibecoding.demo.domain.board.service;
 
 import com.vibecoding.demo.domain.board.dto.PostCreateRequest;
-import com.vibecoding.demo.domain.board.dto.PostResponse;
+import com.vibecoding.demo.domain.board.dto.PostDetailResponse;
+import com.vibecoding.demo.domain.board.dto.PostListResponse;
 import com.vibecoding.demo.domain.board.dto.PostUpdateRequest;
 import com.vibecoding.demo.domain.board.entity.Post;
 import com.vibecoding.demo.domain.board.repository.PostRepository;
+import com.vibecoding.demo.domain.comment.service.CommentService;
 import com.vibecoding.demo.domain.member.entity.Member;
 import com.vibecoding.demo.domain.member.entity.Role;
 import com.vibecoding.demo.domain.member.repository.MemberRepository;
@@ -36,6 +38,9 @@ class PostServiceTest {
 
     @Mock
     private MemberRepository memberRepository;
+
+    @Mock
+    private CommentService commentService;
 
     private Member createMember(Long id, String name, Role role) {
         Member member = Member.builder()
@@ -78,12 +83,30 @@ class PostServiceTest {
                 .willReturn(Arrays.asList(post1, post2));
 
         // when
-        List<PostResponse> result = postService.getPostsByOffsetAndLimit(0, 2);
+        List<PostListResponse> result = postService.getPostsByOffsetAndLimit(0, 2);
 
         // then
         assertThat(result).hasSize(2);
         assertThat(result.get(0).title()).isEqualTo("T1");
         assertThat(result.get(0).authorName()).isEqualTo("tester");
+    }
+
+    @Test
+    @DisplayName("게시글 상세 정보를 조회한다 (댓글 포함)")
+    void getPostDetail() {
+        // given
+        Long postId = 1L;
+        Member member = createMember(1L, "tester", Role.USER);
+        Post post = Post.builder().title("T1").content("C1").member(member).build();
+        given(postRepository.findById(postId)).willReturn(Optional.of(post));
+        given(commentService.getComments(postId)).willReturn(List.of());
+
+        // when
+        PostDetailResponse result = postService.getPostDetail(postId);
+
+        // then
+        assertThat(result.title()).isEqualTo("T1");
+        assertThat(result.comments()).isEmpty();
     }
 
     @Test

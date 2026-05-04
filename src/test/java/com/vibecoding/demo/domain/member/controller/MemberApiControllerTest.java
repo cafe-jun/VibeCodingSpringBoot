@@ -2,7 +2,6 @@ package com.vibecoding.demo.domain.member.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vibecoding.demo.domain.member.dto.LoginRequest;
-import com.vibecoding.demo.domain.member.dto.SignupResponse;
 import com.vibecoding.demo.domain.member.service.MemberService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,6 +30,15 @@ class MemberApiControllerTest {
 
     @MockBean
     private MemberService memberService;
+
+    @MockBean
+    private com.vibecoding.demo.global.security.JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @MockBean
+    private com.vibecoding.demo.global.security.JwtTokenProvider jwtTokenProvider;
+
+    @MockBean
+    private com.vibecoding.demo.global.security.CustomUserDetailsService customUserDetailsService;
 
     @MockBean
     private org.springframework.data.jpa.mapping.JpaMetamodelMappingContext jpaMappingContext;

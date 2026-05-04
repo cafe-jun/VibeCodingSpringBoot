@@ -1,0 +1,17 @@
+package com.vibecoding.demo.domain.board.dto;
+
+import com.vibecoding.demo.domain.comment.dto.CommentResponse;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+public record PostDetailResponse(
+        Long id,
+        String title,
+        String content,
+        String authorName,
+        long commentCount,
+        LocalDateTime createdAt,
+        List<CommentResponse> comments
+) {
+}
