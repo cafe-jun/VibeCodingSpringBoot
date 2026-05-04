@@ -7,7 +7,7 @@ public record PostDetailResponse(
         Long id,
         String title,
         String content,
-        String author,
+        String authorName,
         long commentCount,
         LocalDateTime createdAt,
         List<CommentResponse> comments

@@ -47,8 +47,8 @@ class CommentServiceTest {
         Long postId = 1L;
         Long memberId = 1L;
         CommentCreateRequest request = new CommentCreateRequest("content");
-        Post post = Post.builder().title("title").content("content").author("author").build();
         Member member = Member.builder().loginId("user").password("pass").name("name").email("email").role(Role.USER).build();
+        Post post = Post.builder().title("title").content("content").member(member).build();
         
         given(postRepository.findById(postId)).willReturn(Optional.of(post));
         given(memberRepository.findById(memberId)).willReturn(Optional.of(member));
@@ -67,8 +67,8 @@ class CommentServiceTest {
     void getComments() {
         // given
         Long postId = 1L;
-        Post post = Post.builder().title("title").content("content").author("author").build();
         Member member = Member.builder().loginId("user").password("pass").name("name").email("email").role(Role.USER).build();
+        Post post = Post.builder().title("title").content("content").member(member).build();
         
         Comment comment1 = Comment.builder().post(post).member(member).content("comment1").build();
         Comment comment2 = Comment.builder().post(post).member(member).content("comment2").build();
@@ -117,7 +117,7 @@ class CommentServiceTest {
         Member member = Member.builder().loginId("user").password("pass").name("name").email("email").role(Role.USER).build();
         org.springframework.test.util.ReflectionTestUtils.setField(member, "id", memberId);
 
-        Post post = Post.builder().title("T").content("C").author("A").build();
+        Post post = Post.builder().title("T").content("C").member(member).build();
         post.incrementCommentCount();
 
         Comment comment = Comment.builder()

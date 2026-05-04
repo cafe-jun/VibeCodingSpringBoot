@@ -2,11 +2,11 @@ package com.vibecoding.demo.domain.board.dto;
 
 import java.time.LocalDateTime;
 
-public record PostListResponse(
+public record PostResponse(
         Long id,
         String title,
+        String content,
         String authorName,
-        long commentCount,
         LocalDateTime createdAt
 ) {
 }
