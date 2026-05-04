@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
@@ -46,7 +47,7 @@ class CommentServiceTest {
         // given
         Long postId = 1L;
         Long memberId = 1L;
-        CommentCreateRequest request = new CommentCreateRequest("content");
+        CommentCreateRequest request = new CommentCreateRequest("content", null);
         Member member = Member.builder().loginId("user").password("pass").name("name").email("email").role(Role.USER).build();
         Post post = Post.builder().title("title").content("content").member(member).build();
         
@@ -63,26 +64,55 @@ class CommentServiceTest {
     }
 
     @Test
-    @DisplayName("댓글 목록을 조회한다")
+    @DisplayName("계층형 댓글(2-Depth) 목록을 조회한다")
     void getComments() {
         // given
         Long postId = 1L;
         Member member = Member.builder().loginId("user").password("pass").name("name").email("email").role(Role.USER).build();
         Post post = Post.builder().title("title").content("content").member(member).build();
         
-        Comment comment1 = Comment.builder().post(post).member(member).content("comment1").build();
-        Comment comment2 = Comment.builder().post(post).member(member).content("comment2").build();
+        Comment parent = Comment.builder().post(post).member(member).content("parent").build();
+        org.springframework.test.util.ReflectionTestUtils.setField(parent, "id", 1L);
+        
+        Comment child = Comment.builder().post(post).member(member).content("child").parent(parent).build();
+        org.springframework.test.util.ReflectionTestUtils.setField(child, "id", 2L);
 
         given(postRepository.existsById(postId)).willReturn(true);
-        given(commentRepository.findByPostIdWithMember(postId)).willReturn(List.of(comment1, comment2));
+        given(commentRepository.findByPostIdWithMemberAndParent(postId)).willReturn(List.of(parent, child));
 
         // when
         List<CommentResponse> result = commentService.getComments(postId);
 
         // then
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0).content()).isEqualTo("comment1");
-        assertThat(result.get(1).content()).isEqualTo("comment2");
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).content()).isEqualTo("parent");
+        assertThat(result.get(0).children()).hasSize(1);
+        assertThat(result.get(0).children().get(0).content()).isEqualTo("child");
+    }
+
+    @Test
+    @DisplayName("3단계 이상의 댓글 작성 시도 시 예외가 발생한다")
+    void createComment_depth_limit() {
+        // given
+        Long postId = 1L;
+        Long memberId = 1L;
+        CommentCreateRequest request = new CommentCreateRequest("depth 3", 2L);
+        
+        Member member = Member.builder().loginId("user").password("pass").name("name").email("email").role(Role.USER).build();
+        Post post = Post.builder().title("title").content("content").member(member).build();
+        
+        Comment parent = Comment.builder().post(post).member(member).content("parent").build();
+        Comment child = Comment.builder().post(post).member(member).content("child").parent(parent).build();
+        org.springframework.test.util.ReflectionTestUtils.setField(child, "id", 2L);
+
+        given(postRepository.findById(postId)).willReturn(Optional.of(post));
+        given(memberRepository.findById(memberId)).willReturn(Optional.of(member));
+        given(commentRepository.findById(2L)).willReturn(Optional.of(child));
+
+        // when & then
+        assertThatThrownBy(() -> commentService.createComment(postId, memberId, request))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("댓글은 최대 2단계(대댓글)까지만 작성 가능합니다.");
     }
 
     @Test

@@ -79,7 +79,7 @@ class CommentApiControllerTest {
     @Test
     @DisplayName("댓글을 등록한다")
     void createComment() throws Exception {
-        CommentCreateRequest request = new CommentCreateRequest("comment content");
+        CommentCreateRequest request = new CommentCreateRequest("comment content", null);
         CustomUserDetails userDetails = createUserDetails(1L, Role.USER);
         setAuthentication(userDetails);
         given(commentService.createComment(eq(1L), eq(1L), any(CommentCreateRequest.class))).willReturn(1L);
@@ -95,7 +95,7 @@ class CommentApiControllerTest {
     @Test
     @DisplayName("댓글 목록을 조회한다")
     void getComments() throws Exception {
-        CommentResponse comment = new CommentResponse(1L, "content", "tester", 1L, false, LocalDateTime.now());
+        CommentResponse comment = new CommentResponse(1L, "content", "tester", 1L, false, LocalDateTime.now(), List.of());
         given(commentService.getComments(1L)).willReturn(List.of(comment));
 
         mockMvc.perform(get("/api/posts/1/comments"))

@@ -9,6 +9,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "comments")
 @Getter
@@ -27,6 +30,13 @@ public class Comment extends BaseTimeEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private Comment parent;
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    private List<Comment> children = new ArrayList<>();
+
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
@@ -34,10 +44,11 @@ public class Comment extends BaseTimeEntity {
     private boolean isDeleted = false;
 
     @Builder
-    public Comment(Post post, Member member, String content) {
+    public Comment(Post post, Member member, String content, Comment parent) {
         this.post = post;
         this.member = member;
         this.content = content;
+        this.parent = parent;
     }
 
     public void updateContent(String content) {

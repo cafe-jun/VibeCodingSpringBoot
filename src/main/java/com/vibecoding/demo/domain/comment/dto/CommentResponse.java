@@ -1,6 +1,7 @@
 package com.vibecoding.demo.domain.comment.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record CommentResponse(
         Long id,
@@ -8,6 +9,7 @@ public record CommentResponse(
         String nickname,
         Long memberId,
         boolean isDeleted,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        List<CommentResponse> children
 ) {
 }
