@@ -73,8 +73,8 @@
         try {
             const response = await fetch('/api/posts/count');
             if (response.ok) {
-                const count = await response.json();
-                document.getElementById('totalCount').textContent = count;
+                const result = await response.json();
+                document.getElementById('totalCount').textContent = result.data;
             }
         } catch (error) {
             console.error('총 게시글 수를 가져오는 중 오류 발생:', error);
@@ -111,7 +111,8 @@
             const response = await fetch(url);
             if (!response.ok) throw new Error('API 호출 실패');
             
-            const posts = await response.json();
+            const result = await response.json();
+            const posts = result.data || [];
             const tbody = document.getElementById('postList');
             
             if (posts.length === 0) {

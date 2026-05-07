@@ -59,11 +59,11 @@ public class PostApiController {
     }
     
     @GetMapping("/cursor")
-    public ResponseEntity<List<Post>> getPostsByCursor(
+    public ResponseEntity<ApiResponse<List<PostListResponse>>> getPostsByCursor(
             @RequestParam(required = false) Long lastId,
             @RequestParam(defaultValue = "10") int limit) {
-        List<Post> posts = postService.getPostsByCursor(lastId, limit);
-        return ResponseEntity.ok(posts);
+        List<PostListResponse> posts = postService.getPostsByCursor(lastId, limit);
+        return ResponseEntity.ok(ApiResponse.success(posts));
     }
     
     @GetMapping("/count")
