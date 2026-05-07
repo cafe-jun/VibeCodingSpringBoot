@@ -1,4 +1,4 @@
-package com.vibecoding.demo.domain.board.entity;
+package com.vibecoding.demo.domain.posts.entity;
 
 import com.vibecoding.demo.domain.member.entity.Member;
 import com.vibecoding.demo.global.entity.BaseTimeEntity;

@@ -1,6 +1,6 @@
 package com.vibecoding.demo.domain.comment.entity;
 
-import com.vibecoding.demo.domain.board.entity.Post;
+import com.vibecoding.demo.domain.posts.entity.Post;
 import com.vibecoding.demo.domain.member.entity.Member;
 import com.vibecoding.demo.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;

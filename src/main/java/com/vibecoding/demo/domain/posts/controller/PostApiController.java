@@ -1,7 +1,7 @@
-package com.vibecoding.demo.domain.board.controller;
+package com.vibecoding.demo.domain.posts.controller;
 
-import com.vibecoding.demo.domain.board.dto.*;
-import com.vibecoding.demo.domain.board.service.PostService;
+import com.vibecoding.demo.domain.posts.dto.*;
+import com.vibecoding.demo.domain.posts.service.PostService;
 import com.vibecoding.demo.global.security.CustomUserDetails;
 import com.vibecoding.demo.global.dto.ApiResponse;
 import jakarta.validation.Valid;

@@ -1,7 +1,7 @@
 package com.vibecoding.demo.domain.comment.service;
 
-import com.vibecoding.demo.domain.board.entity.Post;
-import com.vibecoding.demo.domain.board.repository.PostRepository;
+import com.vibecoding.demo.domain.posts.entity.Post;
+import com.vibecoding.demo.domain.posts.repository.PostRepository;
 import com.vibecoding.demo.domain.comment.dto.CommentCreateRequest;
 import com.vibecoding.demo.domain.comment.dto.CommentResponse;
 import com.vibecoding.demo.domain.comment.dto.CommentUpdateRequest;

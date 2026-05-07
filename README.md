@@ -20,7 +20,7 @@ src/main/
 │   ├── global/              # 전역 설정(Security, ErrorHandler, JWT 유틸 등)
 │   ├── domain/
 │   │   ├── member/          # 회원 도메인 (인증/가입/정보수정)
-│   │   └── board/           # 게시판 도메인 (조회수, 좋아요 등 본진)
+│   │   └── posts/           # 게시판 도메인 (조회수, 좋아요 등 본진)
 │   └── Application.java     # 메인 실행 클래스
 │
 └── resources/

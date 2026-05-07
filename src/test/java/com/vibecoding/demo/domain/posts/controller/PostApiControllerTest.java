@@ -1,8 +1,8 @@
-package com.vibecoding.demo.domain.board.controller;
+package com.vibecoding.demo.domain.posts.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vibecoding.demo.domain.board.dto.*;
-import com.vibecoding.demo.domain.board.service.PostService;
+import com.vibecoding.demo.domain.posts.dto.*;
+import com.vibecoding.demo.domain.posts.service.PostService;
 import com.vibecoding.demo.domain.member.entity.Member;
 import com.vibecoding.demo.domain.member.entity.Role;
 import com.vibecoding.demo.global.security.CustomUserDetails;
