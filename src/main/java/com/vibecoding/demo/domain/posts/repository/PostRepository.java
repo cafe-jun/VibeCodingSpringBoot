@@ -1,6 +1,6 @@
-package com.vibecoding.demo.domain.board.repository;
+package com.vibecoding.demo.domain.posts.repository;
 
-import com.vibecoding.demo.domain.board.entity.Post;
+import com.vibecoding.demo.domain.posts.entity.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

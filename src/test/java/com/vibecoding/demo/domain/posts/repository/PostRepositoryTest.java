@@ -1,6 +1,6 @@
-package com.vibecoding.demo.domain.board.repository;
+package com.vibecoding.demo.domain.posts.repository;
 
-import com.vibecoding.demo.domain.board.entity.Post;
+import com.vibecoding.demo.domain.posts.entity.Post;
 import com.vibecoding.demo.domain.member.entity.Member;
 import com.vibecoding.demo.domain.member.entity.Role;
 import com.vibecoding.demo.domain.member.repository.MemberRepository;

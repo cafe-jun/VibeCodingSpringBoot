@@ -1,8 +1,8 @@
-package com.vibecoding.demo.domain.board.service;
+package com.vibecoding.demo.domain.posts.service;
 
-import com.vibecoding.demo.domain.board.dto.*;
-import com.vibecoding.demo.domain.board.entity.Post;
-import com.vibecoding.demo.domain.board.repository.PostRepository;
+import com.vibecoding.demo.domain.posts.dto.*;
+import com.vibecoding.demo.domain.posts.entity.Post;
+import com.vibecoding.demo.domain.posts.repository.PostRepository;
 import com.vibecoding.demo.domain.comment.service.CommentService;
 import com.vibecoding.demo.domain.member.entity.Member;
 import com.vibecoding.demo.domain.member.entity.Role;

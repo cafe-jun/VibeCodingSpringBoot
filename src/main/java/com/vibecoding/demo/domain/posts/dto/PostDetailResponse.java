@@ -1,4 +1,4 @@
-package com.vibecoding.demo.domain.board.dto;
+package com.vibecoding.demo.domain.posts.dto;
 
 import com.vibecoding.demo.domain.comment.dto.CommentResponse;
 

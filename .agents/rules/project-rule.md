@@ -50,7 +50,7 @@ Tech Stack Requirements:
 ## 7. 디렉토리 패키징 규칙 (Directory Rule)
 - 글로벌 Controller/Service 분리 방식보다 결합도가 낮은 도메인/기능별 패키징 구조(Package by Feature)를 지향한다.
 - 도메인 구조 예시:
-  `src/main/java/com/.../domain/board/`
+  `src/main/java/com/.../domain/posts/`
    `- entity/` (JPA Entities)
    `- repository/` (Spring Data JPA Repositories & Custom QueryDSL)
    `- service/` (Business Logic & Facade)
