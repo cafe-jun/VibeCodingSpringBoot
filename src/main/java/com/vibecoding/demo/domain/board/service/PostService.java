@@ -23,6 +23,14 @@ public class PostService {
         return postRepository.count();
     }
     
+    public List<Post> getPostsByCursor(Long lastId, int limit) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, limit);
+        if (lastId == null) {
+            return postRepository.findLatestPosts(pageable);
+        }
+        return postRepository.findByIdLessThanOrderByIdDesc(lastId, pageable);
+    }
+    
     @Transactional
     public Post createPost(String title, String content, String author) {
         return postRepository.save(Post.builder()

@@ -11,4 +11,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Query(value = "SELECT * FROM posts ORDER BY id DESC OFFSET :offset LIMIT :limit", nativeQuery = true)
     List<Post> findPostsWithOffsetAndLimit(@Param("offset") int offset, @Param("limit") int limit);
+
+    List<Post> findByIdLessThanOrderByIdDesc(Long id, org.springframework.data.domain.Pageable pageable);
+    
+    @Query("SELECT p FROM Post p ORDER BY p.id DESC")
+    List<Post> findLatestPosts(org.springframework.data.domain.Pageable pageable);
 }

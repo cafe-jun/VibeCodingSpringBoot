@@ -23,6 +23,14 @@ public class PostApiController {
         return ResponseEntity.ok(posts);
     }
     
+    @GetMapping("/cursor")
+    public ResponseEntity<List<Post>> getPostsByCursor(
+            @RequestParam(required = false) Long lastId,
+            @RequestParam(defaultValue = "10") int limit) {
+        List<Post> posts = postService.getPostsByCursor(lastId, limit);
+        return ResponseEntity.ok(posts);
+    }
+    
     @GetMapping("/count")
     public ResponseEntity<Long> getPostCount() {
         return ResponseEntity.ok(postService.getTotalPostCount());

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>게시판 - 무한 스크롤</title>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1 { font-size: 24px; margin-bottom: 20px; color: #2c3e50; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; table-layout: fixed; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f8f9fa; font-weight: 600; position: sticky; top: 0; z-index: 10; }
+        tr:hover { background-color: #f1f1f1; }
+        .no-data { text-align: center; padding: 20px; color: #7f8c8d; }
+        .loading { text-align: center; padding: 20px; color: #3498db; font-weight: bold; display: none; }
+        
+        /* Loading Spinner */
+        .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 36px; height: 36px; border-radius: 50%; border-left-color: #3498db; animation: spin 1s linear infinite; margin: 0 auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .header-section { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .total-count { font-weight: bold; color: #2980b9; }
+        .nav-links a { color: #3498db; text-decoration: none; font-weight: bold; }
+        .nav-links a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header-section">
+        <h1>게시판 (무한 스크롤)</h1>
+        <div class="nav-links">
+            <a href="/board">일반 페이징으로 가기</a>
+        </div>
+    </div>
+    
+    <div class="total-count">
+        총 게시글 수: <span id="totalCount">0</span>개
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 15%;">ID</th>
+                <th style="width: 45%;">제목</th>
+                <th style="width: 20%;">작성자</th>
+                <th style="width: 20%;">작성일</th>
+            </tr>
+        </thead>
+        <tbody id="postList">
+            <!-- 데이터가 여기에 추가됩니다 -->
+        </tbody>
+    </table>
+    
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+    </div>
+    <div id="sentinel"></div>
+</div>
+
+<script>
+    let lastId = null;
+    let isLoading = false;
+    let isFinished = false;
+    const limit = 20;
+
+    window.addEventListener('DOMContentLoaded', () => {
+        fetchTotalCount();
+        setupIntersectionObserver();
+        fetchPosts(); // 초기 데이터 로드
+    });
+
+    async function fetchTotalCount() {
+        try {
+            const response = await fetch('/api/posts/count');
+            if (response.ok) {
+                const count = await response.json();
+                document.getElementById('totalCount').textContent = count;
+            }
+        } catch (error) {
+            console.error('총 게시글 수를 가져오는 중 오류 발생:', error);
+        }
+    }
+
+    function setupIntersectionObserver() {
+        const sentinel = document.getElementById('sentinel');
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) {
+                fetchPosts();
+            }
+        }, {
+            root: null,
+            rootMargin: '100px', // 스크롤이 바닥에 닿기 100px 전에 미리 로드
+            threshold: 0
+        });
+        
+        observer.observe(sentinel);
+    }
+
+    async function fetchPosts() {
+        if (isLoading || isFinished) return;
+        
+        isLoading = true;
+        document.getElementById('loading').style.display = 'block';
+
+        try {
+            let url = `/api/posts/cursor?limit=${limit}`;
+            if (lastId !== null) {
+                url += `&lastId=${lastId}`;
+            }
+
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('API 호출 실패');
+            
+            const posts = await response.json();
+            const tbody = document.getElementById('postList');
+            
+            if (posts.length === 0) {
+                isFinished = true;
+                if (lastId === null) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="no-data">조회된 데이터가 없습니다.</td></tr>';
+                } else {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = '<td colspan="4" class="no-data">모든 데이터를 불러왔습니다.</td>';
+                    tbody.appendChild(tr);
+                }
+                return;
+            }
+            
+            posts.forEach(post => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${post.id}</td>
+                    <td>${post.title}</td>
+                    <td>${post.author}</td>
+                    <td>${post.createdAt ? new Date(post.createdAt).toLocaleString() : ''}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            // 마지막 ID 업데이트
+            lastId = posts[posts.length - 1].id;
+            
+            // 가져온 데이터가 limit보다 적으면 모든 데이터를 다 가져온 것
+            if (posts.length < limit) {
+                isFinished = true;
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td colspan="4" class="no-data">모든 데이터를 불러왔습니다.</td>';
+                tbody.appendChild(tr);
+            }
+            
+        } catch (error) {
+            console.error(error);
+            alert('데이터를 가져오는 중 오류가 발생했습니다.');
+        } finally {
+            isLoading = false;
+            document.getElementById('loading').style.display = 'none';
+        }
+    }
+</script>
+</body>
+</html>
