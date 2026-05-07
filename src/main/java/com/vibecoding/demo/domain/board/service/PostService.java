@@ -91,4 +91,23 @@ public class PostService {
     public long getTotalPostCount() {
         return postRepository.count();
     }
+    public List<PostListResponse> getPostsByCursor(Long lastId, int limit) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, limit);
+        List<Post> posts;
+        if (lastId == null) {
+            posts = postRepository.findLatestPosts(pageable);
+        } else {
+            posts = postRepository.findByIdLessThanOrderByIdDesc(lastId, pageable);
+        }
+        
+        return posts.stream()
+                .map(post -> new PostListResponse(
+                        post.getId(),
+                        post.getTitle(),
+                        post.getMember().getName(),
+                        post.getCommentCount(),
+                        post.getCreatedAt()
+                ))
+                .collect(Collectors.toList());
+    }
 }

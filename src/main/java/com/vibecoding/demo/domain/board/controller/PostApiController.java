@@ -58,6 +58,14 @@ public class PostApiController {
         return ResponseEntity.ok(ApiResponse.success("게시글이 삭제되었습니다.", null));
     }
     
+    @GetMapping("/cursor")
+    public ResponseEntity<ApiResponse<List<PostListResponse>>> getPostsByCursor(
+            @RequestParam(required = false) Long lastId,
+            @RequestParam(defaultValue = "10") int limit) {
+        List<PostListResponse> posts = postService.getPostsByCursor(lastId, limit);
+        return ResponseEntity.ok(ApiResponse.success(posts));
+    }
+    
     @GetMapping("/count")
     public ResponseEntity<ApiResponse<Long>> getPostCount() {
         return ResponseEntity.ok(ApiResponse.success(postService.getTotalPostCount()));

@@ -71,7 +71,8 @@
         try {
             const response = await fetch('/api/posts/count');
             if (response.ok) {
-                currentTotalCount = await response.json();
+                const result = await response.json();
+                currentTotalCount = result.data;
                 document.getElementById('totalCount').textContent = currentTotalCount;
                 renderPagination();
             }
@@ -120,7 +121,8 @@
             const response = await fetch(`/api/posts?offset=${offset}&limit=${limit}`);
             if (!response.ok) throw new Error('API 호출 실패');
             
-            const posts = await response.json();
+            const result = await response.json();
+            const posts = result.data || [];
             
             tbody.innerHTML = '';
             if (posts.length === 0) {

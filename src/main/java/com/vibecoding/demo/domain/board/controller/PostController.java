@@ -12,4 +12,9 @@ public class PostController {
     public String boardList() {
         return "board/list";
     }
+
+    @GetMapping("/infinite")
+    public String infiniteBoardList() {
+        return "board/infinite-list";
+    }
 }
