@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>게시글 상세</title>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .post-header { border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
+        .post-title { font-size: 28px; margin: 0 0 10px 0; color: #2c3e50; }
+        .post-meta { font-size: 14px; color: #7f8c8d; display: flex; justify-content: space-between; }
+        .post-content { line-height: 1.6; font-size: 16px; white-space: pre-wrap; margin-bottom: 40px; }
+        .btn-group { display: flex; gap: 10px; border-top: 1px solid #eee; padding-top: 20px; }
+        button, .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; text-decoration: none; text-align: center; }
+        .btn-primary { background-color: #3498db; color: white; }
+        .btn-primary:hover { background-color: #2980b9; }
+        .btn-warning { background-color: #f39c12; color: white; display: none; }
+        .btn-warning:hover { background-color: #d68910; }
+        .btn-danger { background-color: #e74c3c; color: white; display: none; }
+        .btn-danger:hover { background-color: #c0392b; }
+        
+        .loading { text-align: center; padding: 50px; color: #7f8c8d; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="loading" class="loading">데이터를 불러오는 중입니다...</div>
+    
+    <div id="postContainer" style="display: none;">
+        <div class="post-header">
+            <h1 id="title" class="post-title"></h1>
+            <div class="post-meta">
+                <span id="author"></span>
+                <span id="createdAt"></span>
+            </div>
+        </div>
+        <div id="content" class="post-content"></div>
+        
+        <div class="btn-group">
+            <a href="/posts" class="btn btn-primary">목록으로</a>
+            <a id="editBtn" href="#" class="btn btn-warning">수정</a>
+            <button id="deleteBtn" class="btn btn-danger">삭제</button>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    const postId = /*[[${postId}]]*/ '1';
+    const token = localStorage.getItem('accessToken');
+    let currentUser = null;
+
+    // JWT 페이로드 파싱 (기본적인 정보 확인용)
+    if (token) {
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            currentUser = payload.sub; // username or loginId
+        } catch (e) {
+            console.error('토큰 파싱 실패', e);
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', fetchPost);
+
+    async function fetchPost() {
+        try {
+            const response = await fetch(`/api/posts/${postId}`);
+            if (!response.ok) throw new Error('API 호출 실패');
+            
+            const result = await response.json();
+            const post = result.data;
+            
+            document.getElementById('title').textContent = post.title;
+            document.getElementById('content').textContent = post.content;
+            document.getElementById('author').textContent = '작성자: ' + post.author;
+            document.getElementById('createdAt').textContent = '작성일: ' + (post.createdAt ? new Date(post.createdAt).toLocaleString() : '');
+            
+            // 작성자 본인이면 수정/삭제 버튼 노출 (프론트엔드 레벨 검증)
+            // 백엔드의 post.author와 토큰의 currentUser가 일치하는지 확인.
+            // (주의: 완벽한 보안은 백엔드에서 처리되지만 UI 표시용입니다)
+            if (currentUser && currentUser === post.author) {
+                const editBtn = document.getElementById('editBtn');
+                editBtn.href = `/posts/${postId}/edit`;
+                editBtn.style.display = 'block';
+                
+                const deleteBtn = document.getElementById('deleteBtn');
+                deleteBtn.style.display = 'block';
+                deleteBtn.addEventListener('click', deletePost);
+            }
+            
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('postContainer').style.display = 'block';
+            
+        } catch (error) {
+            console.error('에러:', error);
+            alert('게시글을 불러올 수 없습니다.');
+            window.location.href = '/posts';
+        }
+    }
+
+    async function deletePost() {
+        if (!confirm('정말로 이 게시글을 삭제하시겠습니까?')) return;
+        
+        try {
+            const response = await fetch(`/api/posts/${postId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                alert('삭제되었습니다.');
+                window.location.href = '/posts';
+            } else {
+                alert(result.message || '삭제에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('에러:', error);
+            alert('서버와의 통신에 실패했습니다.');
+        }
+    }
+</script>
+
+</body>
+</html>

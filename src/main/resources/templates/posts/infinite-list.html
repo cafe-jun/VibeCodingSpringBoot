@@ -29,7 +29,10 @@
     <div class="header-section">
         <h1>게시판 (무한 스크롤)</h1>
         <div class="nav-links">
-            <a href="/posts">일반 페이징으로 가기</a>
+            <a href="/posts" style="margin-right: 15px;">일반 페이징으로 가기</a>
+            <a href="/posts/write" id="writeBtn" style="display: none; background-color: #2ecc71; color: white; padding: 8px 12px; border-radius: 4px;">글쓰기</a>
+            <a href="/login" id="loginBtn" style="margin-left: 10px;">로그인</a>
+            <a href="#" id="logoutBtn" style="display: none; margin-left: 10px; color: #e74c3c;">로그아웃</a>
         </div>
     </div>
     
@@ -64,10 +67,26 @@
     const limit = 20;
 
     window.addEventListener('DOMContentLoaded', () => {
+        setupAuthUI();
         fetchTotalCount();
         setupIntersectionObserver();
         fetchPosts(); // 초기 데이터 로드
     });
+
+    function setupAuthUI() {
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+            document.getElementById('writeBtn').style.display = 'inline-block';
+            document.getElementById('loginBtn').style.display = 'none';
+            document.getElementById('logoutBtn').style.display = 'inline-block';
+        }
+        
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('accessToken');
+            location.reload();
+        });
+    }
 
     async function fetchTotalCount() {
         try {
@@ -131,7 +150,7 @@
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${post.id}</td>
-                    <td>${post.title}</td>
+                    <td><a href="/posts/${post.id}" style="text-decoration: none; color: #2c3e50; font-weight: bold;">${post.title}</a></td>
                     <td>${post.author}</td>
                     <td>${post.createdAt ? new Date(post.createdAt).toLocaleString() : ''}</td>
                 `;

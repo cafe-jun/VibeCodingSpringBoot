@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>게시글 수정</title>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1 { font-size: 24px; margin-bottom: 20px; color: #2c3e50; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; }
+        input[type="text"], textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        textarea { height: 200px; resize: vertical; }
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
+        button, .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: bold; text-decoration: none; text-align: center; }
+        .btn-warning { background-color: #f39c12; color: white; }
+        .btn-warning:hover { background-color: #d68910; }
+        .btn-secondary { background-color: #95a5a6; color: white; }
+        .btn-secondary:hover { background-color: #7f8c8d; }
+        .loading { text-align: center; padding: 50px; color: #7f8c8d; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>게시글 수정</h1>
+    <div id="loading" class="loading">데이터를 불러오는 중입니다...</div>
+    
+    <form id="editForm" style="display: none;">
+        <div class="form-group">
+            <label for="title">제목</label>
+            <input type="text" id="title" name="title" required>
+        </div>
+        <div class="form-group">
+            <label for="content">내용</label>
+            <textarea id="content" name="content" required></textarea>
+        </div>
+        <div class="btn-group">
+            <button type="submit" class="btn btn-warning">수정 완료</button>
+            <a id="cancelBtn" href="#" class="btn btn-secondary">취소</a>
+        </div>
+    </form>
+</div>
+
+<script th:inline="javascript">
+    const postId = /*[[${postId}]]*/ '1';
+    const token = localStorage.getItem('accessToken');
+    
+    if (!token) {
+        alert('로그인이 필요합니다.');
+        window.location.href = '/login';
+    }
+
+    document.getElementById('cancelBtn').href = `/posts/${postId}`;
+
+    window.addEventListener('DOMContentLoaded', fetchPost);
+
+    async function fetchPost() {
+        try {
+            const response = await fetch(`/api/posts/${postId}`);
+            if (!response.ok) throw new Error('API 호출 실패');
+            
+            const result = await response.json();
+            const post = result.data;
+            
+            document.getElementById('title').value = post.title;
+            document.getElementById('content').value = post.content;
+            
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('editForm').style.display = 'block';
+            
+        } catch (error) {
+            console.error('에러:', error);
+            alert('게시글을 불러올 수 없습니다.');
+            window.location.href = `/posts/${postId}`;
+        }
+    }
+
+    document.getElementById('editForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const title = document.getElementById('title').value;
+        const content = document.getElementById('content').value;
+        
+        try {
+            const response = await fetch(`/api/posts/${postId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({ title, content })
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                alert('게시글이 성공적으로 수정되었습니다.');
+                window.location.href = `/posts/${postId}`;
+            } else {
+                alert(result.message || '수정에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('에러:', error);
+            alert('서버와의 통신에 실패했습니다.');
+        }
+    });
+</script>
+
+</body>
+</html>
