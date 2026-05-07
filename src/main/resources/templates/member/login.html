@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>로그인</title>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .login-container { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        h1 { font-size: 24px; margin-bottom: 20px; color: #2c3e50; text-align: center; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; }
+        input[type="text"], input[type="password"] { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background-color: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s; font-size: 16px; font-weight: bold; }
+        button:hover { background-color: #2980b9; }
+        .error-message { color: #e74c3c; margin-top: 10px; text-align: center; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="login-container">
+    <h1>로그인</h1>
+    <form id="loginForm">
+        <div class="form-group">
+            <label for="loginId">아이디 (Login ID)</label>
+            <input type="text" id="loginId" name="loginId" required>
+        </div>
+        <div class="form-group">
+            <label for="password">비밀번호 (Password)</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <button type="submit">로그인</button>
+    </form>
+    <div id="errorMessage" class="error-message">아이디 또는 비밀번호가 잘못되었습니다.</div>
+</div>
+
+<script>
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const loginId = document.getElementById('loginId').value;
+        const password = document.getElementById('password').value;
+        const errorMessage = document.getElementById('errorMessage');
+        
+        try {
+            const response = await fetch('/api/members/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ loginId, password })
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok && result.data && result.data.accessToken) {
+                // Save JWT token
+                localStorage.setItem('accessToken', result.data.accessToken);
+                // Redirect to posts
+                window.location.href = '/posts';
+            } else {
+                errorMessage.textContent = result.message || '로그인에 실패했습니다.';
+                errorMessage.style.display = 'block';
+            }
+        } catch (error) {
+            console.error('로그인 에러:', error);
+            errorMessage.textContent = '서버와의 통신에 실패했습니다.';
+            errorMessage.style.display = 'block';
+        }
+    });
+</script>
+
+</body>
+</html>

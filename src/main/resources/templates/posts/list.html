@@ -20,11 +20,21 @@
         .pagination button { padding: 8px 12px; background-color: #f8f9fa; color: #333; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; }
         .pagination button:hover { background-color: #e9ecef; }
         .pagination button.active { background-color: #3498db; color: white; border-color: #3498db; }
+        .header-section { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .nav-links a { text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>게시판 (N번째부터 M개 조회)</h1>
+    <div class="header-section">
+        <h1>게시판 (일반 페이징)</h1>
+        <div class="nav-links">
+            <a href="/posts/infinite" style="margin-right: 15px;">무한 스크롤로 가기</a>
+            <a href="/posts/write" id="writeBtn" style="display: none; background-color: #2ecc71; color: white; padding: 8px 12px; border-radius: 4px;">글쓰기</a>
+            <a href="/login" id="loginBtn" style="margin-left: 10px; color: #3498db;">로그인</a>
+            <a href="#" id="logoutBtn" style="display: none; margin-left: 10px; color: #e74c3c;">로그아웃</a>
+        </div>
+    </div>
     <div style="margin-bottom: 20px; font-weight: bold; color: #2980b9;">
         총 게시글 수: <span id="totalCount">0</span>개
     </div>
@@ -61,9 +71,25 @@
 <script>
     // 페이지 진입 시 처음부터 데이터를 불러옵니다.
     window.addEventListener('DOMContentLoaded', () => {
+        setupAuthUI();
         fetchTotalCount();
         fetchPosts();
     });
+
+    function setupAuthUI() {
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+            document.getElementById('writeBtn').style.display = 'inline-block';
+            document.getElementById('loginBtn').style.display = 'none';
+            document.getElementById('logoutBtn').style.display = 'inline-block';
+        }
+        
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('accessToken');
+            location.reload();
+        });
+    }
 
     let currentTotalCount = 0;
 
@@ -134,7 +160,7 @@
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${post.id}</td>
-                    <td>${post.title}</td>
+                    <td><a href="/posts/${post.id}" style="text-decoration: none; color: #2c3e50; font-weight: bold;">${post.title}</a></td>
                     <td>${post.author}</td>
                     <td>${post.createdAt ? new Date(post.createdAt).toLocaleString() : ''}</td>
                 `;
