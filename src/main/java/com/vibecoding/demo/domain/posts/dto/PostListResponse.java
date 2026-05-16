@@ -7,6 +7,7 @@ public record PostListResponse(
         String title,
         String authorName,
         long commentCount,
+        long viewCount,
         LocalDateTime createdAt
 ) {
 }

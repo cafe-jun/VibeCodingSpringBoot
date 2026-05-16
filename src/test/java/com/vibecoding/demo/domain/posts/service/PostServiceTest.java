@@ -89,6 +89,7 @@ class PostServiceTest {
         assertThat(result).hasSize(2);
         assertThat(result.get(0).title()).isEqualTo("T1");
         assertThat(result.get(0).authorName()).isEqualTo("tester");
+        assertThat(result.get(0).viewCount()).isEqualTo(0L);
     }
 
     @Test
@@ -106,7 +107,24 @@ class PostServiceTest {
 
         // then
         assertThat(result.title()).isEqualTo("T1");
+        assertThat(result.viewCount()).isEqualTo(0L);
         assertThat(result.comments()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("조회수를 증가시킨다")
+    void increaseViewCount() {
+        // given
+        Long postId = 1L;
+        Member member = createMember(1L, "tester", Role.USER);
+        Post post = Post.builder().title("T").content("C").member(member).build();
+        given(postRepository.findById(postId)).willReturn(Optional.of(post));
+
+        // when
+        postService.increaseViewCount(postId);
+
+        // then
+        assertThat(post.getViewCount()).isEqualTo(1L);
     }
 
     @Test

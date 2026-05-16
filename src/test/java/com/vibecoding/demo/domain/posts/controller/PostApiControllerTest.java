@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -95,13 +96,28 @@ class PostApiControllerTest {
     @Test
     @DisplayName("게시글 목록을 조회한다")
     void getPosts() throws Exception {
-        PostListResponse post1 = new PostListResponse(1L, "T1", "tester", 0, LocalDateTime.now());
+        PostListResponse post1 = new PostListResponse(1L, "T1", "tester", 0, 0, LocalDateTime.now());
         given(postService.getPostsByOffsetAndLimit(0, 10)).willReturn(Arrays.asList(post1));
 
         mockMvc.perform(get("/api/posts"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data[0].title").value("T1"));
+    }
+
+    @Test
+    @DisplayName("GET /api/posts/{postId} 가 상세 정보와 댓글을 반환한다")
+    void getPostDetail() throws Exception {
+        // given
+        PostDetailResponse post = new PostDetailResponse(1L, "T1", "C1", "A1", 0, 0, LocalDateTime.now(), List.of());
+        given(postService.getPostDetail(1L)).willReturn(post);
+
+        // when & then
+        mockMvc.perform(get("/api/posts/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.title").value("T1"))
+                .andExpect(jsonPath("$.data.comments").isArray());
     }
 
     @Test
