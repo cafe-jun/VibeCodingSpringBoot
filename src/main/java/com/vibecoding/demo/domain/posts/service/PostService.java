@@ -44,6 +44,7 @@ public class PostService {
                         post.getTitle(),
                         post.getMember().getName(),
                         post.getCommentCount(),
+                        post.getViewCount(),
                         post.getCreatedAt()
                 ))
                 .collect(Collectors.toList());
@@ -59,9 +60,17 @@ public class PostService {
                 post.getContent(),
                 post.getMember().getName(),
                 post.getCommentCount(),
+                post.getViewCount(),
                 post.getCreatedAt(),
                 commentService.getComments(postId)
         );
+    }
+
+    @Transactional
+    public void increaseViewCount(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
+        post.incrementViewCount();
     }
 
     @Transactional
@@ -106,6 +115,7 @@ public class PostService {
                         post.getTitle(),
                         post.getMember().getName(),
                         post.getCommentCount(),
+                        post.getViewCount(),
                         post.getCreatedAt()
                 ))
                 .collect(Collectors.toList());

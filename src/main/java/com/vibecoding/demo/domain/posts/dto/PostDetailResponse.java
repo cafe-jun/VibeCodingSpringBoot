@@ -11,6 +11,7 @@ public record PostDetailResponse(
         String content,
         String authorName,
         long commentCount,
+        long viewCount,
         LocalDateTime createdAt,
         List<CommentResponse> comments
 ) {

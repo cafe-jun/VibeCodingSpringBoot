@@ -31,6 +31,9 @@ public class Post extends BaseTimeEntity {
     @Column(name = "comment_count", nullable = false)
     private long commentCount = 0;
 
+    @Column(name = "view_count", nullable = false)
+    private long viewCount = 0;
+
     @Builder
     public Post(String title, String content, Member member) {
         this.title = title;
@@ -51,5 +54,9 @@ public class Post extends BaseTimeEntity {
         if (this.commentCount > 0) {
             this.commentCount--;
         }
+    }
+
+    public void incrementViewCount() {
+        this.viewCount++;
     }
 }

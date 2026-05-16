@@ -2,14 +2,19 @@ package com.vibecoding.demo.domain.posts.controller;
 
 import com.vibecoding.demo.domain.posts.dto.*;
 import com.vibecoding.demo.domain.posts.service.PostService;
-import com.vibecoding.demo.global.security.CustomUserDetails;
 import com.vibecoding.demo.global.dto.ApiResponse;
+import com.vibecoding.demo.global.security.CustomUserDetails;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -36,9 +41,52 @@ public class PostApiController {
     }
 
     @GetMapping("/{postId}")
-    public ResponseEntity<ApiResponse<PostDetailResponse>> getPost(@PathVariable Long postId) {
+    public ResponseEntity<ApiResponse<PostDetailResponse>> getPost(
+            @PathVariable Long postId,
+            HttpServletRequest request,
+            HttpServletResponse response) {
+        
+        handleViewCount(postId, request, response);
         PostDetailResponse post = postService.getPostDetail(postId);
         return ResponseEntity.ok(ApiResponse.success(post));
+    }
+
+    private void handleViewCount(Long postId, HttpServletRequest request, HttpServletResponse response) {
+        Cookie[] cookies = request.getCookies();
+        Cookie oldCookie = null;
+        
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("viewed_posts")) {
+                    oldCookie = cookie;
+                    break;
+                }
+            }
+        }
+
+        if (oldCookie == null) {
+            postService.increaseViewCount(postId);
+            Cookie newCookie = new Cookie("viewed_posts", "[" + postId + "]");
+            newCookie.setPath("/");
+            newCookie.setHttpOnly(true);
+            newCookie.setMaxAge((int) getSecondsUntilMidnight());
+            response.addCookie(newCookie);
+        } else {
+            if (!oldCookie.getValue().contains("[" + postId + "]")) {
+                postService.increaseViewCount(postId);
+                oldCookie.setValue(oldCookie.getValue() + "[" + postId + "]");
+                oldCookie.setPath("/");
+                oldCookie.setHttpOnly(true);
+                oldCookie.setMaxAge((int) getSecondsUntilMidnight());
+                response.addCookie(oldCookie);
+            }
+        }
+    }
+
+    private long getSecondsUntilMidnight() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime midnight = now.toLocalDate().plusDays(1).atStartOfDay();
+        return Duration.between(now, midnight).getSeconds();
     }
 
     @PatchMapping("/{postId}")
